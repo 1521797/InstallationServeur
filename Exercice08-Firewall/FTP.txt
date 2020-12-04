@@ -1,0 +1,14 @@
+FTP
+Modèle Client-Serveur
+
+Écoute sur TCP 21
+
+Non sécuritaire car les échanges se font en texte clair
+
+Connexion active
+Serveur envoie des données sur TCP 20 vers un port client (à partir du port 1023 et plus)
+Bon pour partager des fichiers en développement
+
+Connexion passive
+Client qui demande la connexion et demande un port au serveur
+Populaire pour les navigateurs car s'il y a un pare-feu sur le client, le port n'est pas bloqué vu qu'on le demande

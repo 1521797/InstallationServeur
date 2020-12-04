@@ -1,0 +1,131 @@
+Exercices 2 – Apache
+
+Informations
+    Évaluation : formative
+    Type de travail : individuel
+    Durée : 2 heures
+    Système d’exploitation : Ubuntu serveur
+    Environnement : virtuel
+
+Objectifs
+    Cet exercice a pour objectifs :
+    •	D’installer le serveur Web Apache.
+    •	Faire une configuration de base.
+
+Dans cet exercice, vous allez installer un environnement de serveur Web (HTTP) Apache (httpd), regarder à sa configuration de base et modifier quelques paramètres.
+
+Note : si vous fermez votre VM, n’oubliez pas d’arrêter vos conteneurs :
+    docker container stop nom_conteneur
+    docker container start nom_conteneur
+
+
+Partie 1 : Installation d’Apache
+Dans cette partie, vous allez installer le serveur Web Apache selon les spécifications données.
+    
+    Étape 1 : Installation
+        a.	Pour débuter, on doit trouver une image qui nous intéresse. Aller sur le site Web hub.docker.com 
+        (un peu comme github, docker hub est un dépôt pour mettre nos images, il est aussi possible de récupérer des images faites par d’autres personnes). 
+        Si ce n’est pas déjà fait, inscrivez-vous. Une fois connecté, faites une recherche pour httpd (apache). 
+        Vous pouvez voir qu’il y a plus de 8 000 images. La première est l’image officielle et celle dont nous allons nous servir. 
+        Cliquez httpd et vous allez avoir toute l’information pour vous servir de l’image.
+
+        b.	Avant de lancer notre serveur, on va se créer un répertoire pour nos fichiers HTML. 
+        À partir de votre répertoire (dossier) $HOME, créer un répertoire Dev et à l’intérieur un répertoire Site1. 
+        Vous devriez avoir la structure suivante :
+            /home/user01/Dev/Sites
+
+        c.	Entrez dans le répertoire Sites et exécutez la commande recommandée pour lancer l’image httpd.
+            docker run -dit --name my-apache-app -p 8080:80 -v "$PWD":/usr/local/apache2/htdocs/ httpd:2.4
+    
+        d.	Vérifiez que votre image s’exécute bien.
+            docker container ls
+            ss -tnap | grep 8080
+
+            Ouvrez un navigateur et allez au site Web http://localhost:8080.
+            Avez-vous une page Web? Sinon, pourquoi?
+
+        e.	Dans le répertoire Sites ajouter une page Web index.html avec le contenu ci-dessous 
+        (vous l’améliorer à votre goût) et rafraîchir la page de votre navigateur.
+
+            <html>
+            <title>Apache test</title>
+            <body>
+                <p>Wow! Une page Web!</p>
+            </body>
+            </html>
+
+        Avez-vous une page Web?
+
+Partie 2 : Configurations
+Dans cette partie, vous allez regarder la configuration par défaut et faire quelques changements.
+    Étape 1 : Configuration par défaut
+        a.	Allez sur le site de la documentation d’Apache, https://httpd.apache.org/docs/2.4/getting-started.html, et répondez aux questions suivantes :
+        a.	Quel fichier sur votre VM devez-vous modifier pour pouvoir résoudre un nom de domaine local (serveur qui n’a pas accès à Internet). 
+        b.	Quel est l’endroit, répertoire, des fichiers par défauts ?
+        c.	Quel est le nom du fichier de configuration ? 
+        d.	Quelle est l’utilité de la directive Include ? 
+        e.	Comment configure-t-on un serveur Apache ? 
+        f.	Où dois-je mettre une directive ? 
+        g.	Où est placé le fichier .htaccess et quelle est son utilité ? 
+        h.	Quelle directive permet de spécifie où dans votre système de fichiers vous devez placer les fichiers de votre site Web ? 
+        i.	Quelle directive définit l’emplacement du journal d’erreurs ? 
+        j.	Est-ce que cette directive est seulement globale ou elle peut être définie par hôte virtuel ? 
+
+
+    Étape 2 : Consultation des configurations par défaut
+        a.	Connectez-vous sur votre serveur en ligne de commande.
+            docker container exec -it my-apache-app bash
+
+        b.	Déplacez-vous dans le répertoire de configuration et ouvrez le fichier de configuration par défaut.  
+            Répondez aux questions suivantes :
+                Note : vous devrez installer un éditeur de texte (nano ou vim).
+                    apt update && apt install vim -y
+
+            a.	Quelle est l’utilité de la directive ServerRoot ? 
+            b.	Quelle est l’utilité de la directive Listen ? 
+            c.	Sous quel utilisateur et groupe s’exécute httpd ? 
+            d.	Quelle est l’utilité de la directive ServerName ? 
+            e.	Quel est le répertoire pour les fichiers du site Web par défaut ?
+            c.	Déplacez-vous dans le répertoire extra et regardez ce qu’il contient. Regarder le contenu des fichiers httpd-default.conf, httpd-manual.conf et httpd-vhosts.conf
+
+    Étape 3 : Configurations
+        a.	Modifiez le fichier hosts de votre VM pour ajouter que 127.0.0.1 pointe à www.monsite.com.
+            Ouvrez Firefox et entrez votre site Web : http://www.monsite.com:8080.
+            a.	Avez-vous votre page Web? 
+
+        b.	Nous allons changer le répertoire du site Web par défaut.
+            a.	Regarder les droits du répertoire par défaut et notez les informations
+                    ls -ahl /usr/local/apache2/htdocs
+
+            b.	Créer le répertoire /srv/htdocs et changer les droits (chomd) du répertoire pour avoir les mêmes que celui par défaut.
+            c.	Faire une copie du fichier de configuration de httpd.conf.
+            d.	Modifiez l’entrée dans le fichier httpd.conf pour que le répertoire par défaut devienne /srv/htdocs (vous avez deux entrées à modifier).
+            e.	Relancer le serveur httpd : apachectl restart.
+            f.	Déplacez-vous dans le répertoire /srv/htdocs, créer un document toto.txt comme suit :
+                    echo "Information personnelle" > toto.txt
+            g.	Rafraîchir la page de Firefox.
+            h.	Que s’est-il passé? 
+            i.	Copier votre fichier index.html et rafraîchir la page par défaut.
+            j.	Que s’est-il passé? 
+
+        c.	Ouvrez le fichier de configuration httpd.conf et changer les fichiers de journaux (logs) d’erreurs et d’accès pour (mettre les entrées actuelles en commentaires, elles vont servir plus tard) :
+            logs/errors_log
+            logs/access_log common
+
+        d.	Relancez le serveur httpd et consultez les fichiers de journaux avec la commande tail. Si vous n’avez pas de log, rafraîchir la page Web.
+        e.	Exécuter la commande tail avec le paramètre -f et rafraîchir votre page Web quelques fois.
+        a.	Que permet le paramètre -f ? 
+        f.	Dans le fichier httpd.conf, inclure le fichier de configuration des configurations par défauts (rechercher httpd-default.conf dans le fichier).
+        g.	Nous allons récupérer quelques fichiers de configurations.
+            a.	Copier les fichiers httpd.conf, httpd-vhosts.conf et https-ssl.conf dans le répertoire /srv/htdocs.
+            b.	Entrez l’URL dans Firefox pour afficher un fichier (par exemple, http://www.monsite.com:8080/httpd.conf), puis avec le bouton droit de la souris sauvegarder les fichiers dans votre VM hôte.
+
+Partie 3 : Nettoyage
+    a.	Sortir du conteneur Apache, arrêter et effacer votre conteur Apache.
+
+Pour vérification
+Remettre le document Word avec les questions répondues.
+
+Références
+https://httpd.apache.org/docs/2.4/ 
+

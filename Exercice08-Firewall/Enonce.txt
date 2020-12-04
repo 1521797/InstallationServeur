@@ -1,0 +1,99 @@
+// Énoncé Exercice FTP
+
+// Installation de serveur de fichiers local
+sudo apt update && sudo apt install pure-ftpd -y
+
+// Configuration
+sudo groupadd ftpgroup
+sudo useradd -g ftpgroup -d /dev/null -s /etc ftpuser
+
+//Gérer les utilisateurs virtuels de pure-ftpd
+cd /etc/pure-ftpd/auth/
+sudo ln -s ../conf/PureDB 60pdb
+
+//On crée le répertoire de l’utilisateur virtuel userftp
+sudo mkdir -p /ftphome
+sudo chown -R ftpuser:ftpgroup /ftphome/
+sudo systemctl restart pure-ftpd
+
+// Test
+sudo systemctl status pure-ftpd.service
+sudo ss -tnap | grep 21
+ftp localhost
+
+// Étape 3: FTP sécuritaire
+https://websiteforstudents.com/setup-pure-ftpd-on-ubuntu-16-04-lts-with-ssl-tls-certificates/
+
+Country Name (2 letter code) [AU]:CA
+State or Province Name (full name) [Some-State]:Canada
+Locality Name (eg, city) []:Quebec
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:Website for Students
+Organizational Unit Name (eg, section) []:SSL Unit
+Common Name (e.g. server FQDN or YOUR name) []:localhost
+Email Address []:1521797@csfoy.ca
+
+sudo openssl req -x509 -nodes -newkey rsa:2048 -keyout /etc/ssl/private/pure-ftpd.pem -out /etc/ssl/private/pure-ftpd.pem -days 365
+
+https://download.pureftpd.org/pub/pure-ftpd/doc/README.TLS
+- With "--tls=1", clients can connect either the traditional way or through an
+TLS layer. This is probably the setting you need if you want to enable
+TLS without having too many angry customers.
+
+- With "--tls=2", cleartext sessions are refused and only TLS compatible
+clients are accepted.
+
+echo "1" > /etc/pure-ftpd/conf/TLS
+
+
+
+// Partie 2 avec Docker
+https://hub.docker.com/r/stilliard/pure-ftpd
+	Nom du conteneur : ftpd_serveur
+	Ports : 21 et les ports pour le mode passif
+	IP/Host setting for PASV support : localhost
+	Utilisateur : userftp, mot de passe serv1 et répertoire /home/userftp
+	Volume : /home/user01/Dev/Ftpd/home vers /home/userftp
+
+options : man pure-ftpd
+/usr/sbin/pure-ftpd # path to pure-ftpd executable
+-c 5 # --maxclientsnumber (no more than 5 people at once)
+-C 5 # --maxclientsperip (no more than 5 requests from the same ip)
+-l puredb:/etc/pure-ftpd/pureftpd.pdb # --login (login file for virtual users)
+-E # --noanonymous (only real users)
+-j # --createhomedir (auto create home directory if it doesnt already exist)
+-R # --nochmod (prevent usage of the CHMOD command)
+-P $PUBLICHOST # IP/Host setting for PASV support, passed in your the PUBLICHOST env var
+-p 30000:30009 # PASV port range (10 ports for 5 max clients)
+-tls 1 # Enables optional TLS support
+
+docker run -e FTP_PASSIVE_PORTS=10000:10009 --expose=10000-10009 -p 21:21 -p 10000-10009:10000-10009
+
+
+
+// Test
+// On ne peut pas utiliser le localhost, il faut se connecter à mon adresse IP 10.100.1.214 (ens160)
+ftp votre_IP
+
+// Étape 2 avec Docker-compose 
+version: '3'
+
+# Usage example: https://github.com/stilliard/docker-pure-ftpd/wiki/Docker-stack-with-Wordpress-&-FTP
+
+services:
+  ftpd_server:
+    image: stilliard/pure-ftpd
+    ports:
+      - "21:21"
+      - "30000-30009:30000-30009"
+    volumes: # remember to replace /folder_on_disk/ with the path to where you want to store the files on the host machine
+      - "/folder_on_disk/data:/home/username/"
+# uncomment for ssl/tls, see https://github.com/stilliard/docker-pure-ftpd#tls
+#      - "/folder_on_disk/ssl:/etc/ssl/private/"
+    environment:
+      PUBLICHOST: "localhost"
+      FTP_USER_NAME: username
+      FTP_USER_PASS: mypass
+      FTP_USER_HOME: /home/username
+# also for ssl/tls:
+#      ADDED_FLAGS: "--tls=2"
+    restart: always

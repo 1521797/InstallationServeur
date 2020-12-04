@@ -1,0 +1,163 @@
+420-W45-SF Installation des serveurs et des services
+
+Exercices 1 – Installation du serveur Ubuntu
+
+Informations
+    Évaluation : formative
+    Type de travail : individuel
+    Durée : 2 heures
+    Système d’exploitation : Linux Ubuntu
+    Environnement : virtuel
+
+Objectifs
+    Cet exercice a pour objectifs :
+        • D’installer un environnement de travail
+        Dans cet exercice, vous allez vous installer un environnement de travail pour la majorité des exercices et des travaux pratiques du cours. Vous allez utiliser un client Linux Ubuntu comme un serveur.
+
+Partie 1 : Installation d’Ubuntu serveur
+    Étape 1 : Installation
+        a. En utilisant l’ISO ubuntu-20.04-desktop-amd64.iso, 
+        créez une machine virtuelle selon les spécifications suivantes : 
+            Dossier dans vSphere : 
+                DFC DS/VM DFC/A2020_4361_InstServeurs_CR/#matricule 
+                CPU : 2 
+                Mémoires : 4 Go 
+                Nouveau disque : 50 Go 
+                CD/DVD : ISO ubuntu-20.04-desktop-amd64.iso
+        b. Une fois la VM créée, lancez la VM et installez le serveur Ubuntu selon les spécifications suivantes : 
+            Clavier : French (Canada) ou English (US) 
+            Type d’installation : Minimal Partitions :
+
+        Point de montage    Taille
+        swap                1 Go
+        /var                7 Go
+        /home               3 Go
+        /                   le reste
+
+        c. Une fois l’installation terminée :
+            a. Mettez à jour votre serveur (il vaut mieux relancer le serveur après).
+            b. Générez une nouvelle clé SSH : 
+                ssh-keygen -t ed25519 -C "1521797@csfoy.ca"
+            c. Installez les open-vm-tools.
+                    sudo apt-get update
+                    sudo apt-get install open-vm-tools-desktop
+                    sudo apt-get install open-vm-tools
+
+Partie 2 : Ajout de services et configurations
+    Dans cette partie, vous allez ajouter le service SSH, 
+    les logiciels wget, curl, git, Visual Studio Code et Docker
+    et faire quelques configurations supplémentaires.
+
+    Étape 1 : Ajout du service SSH
+        a. Nous allons installer le service SSH.
+            sudo apt install ssh -y
+            
+        Et le lancer de manière permanente.
+            sudo systemctl enable ssh
+
+        On vérifie si le port 22 est bien en écoute.
+            sudo ss -tnap
+
+    Étape 2 : Ajout de logiciels de base
+        a. Nous allons installer les outils de base wget, curl et git. 
+           Pour ceux qui le désire, vous pouvez également ajouter vim.
+                sudo apt install wget curl git vim -y
+        
+        b. Installer Visual Studio Code : https://code.visualstudio.com/
+            télécharger la version Ubuntu debian 
+            sudo apt install ./code_1.50.1-1602600906_amd64.deb
+    
+    Étape 3 : Ajout de Docker
+        a. Il existe plusieurs manières d’installer Docker. 
+           Nous allons utiliser le script officiel de Docker pour
+           l’installer (vous pouvez consulter le script à https://get.docker.com).
+            curl -fsSL https://get.docker.com -o get-docker.sh
+            sh get-docker.sh
+            sudo usermod -aG docker user01
+            sudo docker version
+
+        Avec ces commandes, vous avez installé Docker, vous avez ajouté votre utilisateur au groupe
+        Docker (ça évite de toujours utiliser sudo devant vos commandes Docker, par contre ce n’est pas une
+        bonne habitude de sécurité) et vous avez vérifié que Docker est bien installé.
+        Vous devez relancer (reboot) Ubuntu pour que votre utilisateur soit inclus dans le groupe docker.
+        
+        b. Nous allons également installer Docker machine et Docker Compose.
+        Pour Docker machine, aller au site Web https://docs.docker.com/machine/install-machine/. Exécutez
+        les instructions se trouvant sous «Install Docker Machine->If you are running Linux».
+            $ base=https://github.com/docker/machine/releases/download/v0.16.0 &&
+            curl -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine &&
+            sudo mv /tmp/docker-machine /usr/local/bin/docker-machine &&
+            chmod +x /usr/local/bin/docker-machine
+
+        Vous pouvez vérifier votre installation avec la commande :
+            docker-machine version
+
+        Pour Docker Compose, aller au site Web https://docs.docker.com/compose/install/. Sous «Install
+        Compose», cliquer sur Linux et suivre les instructions d’installation.
+            sudo curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+            docker-compose --version
+
+            // pour installer l'auto-completion
+            sudo curl -L https://raw.githubusercontent.com/docker/compose/1.27.4/contrib/completion/bash/docker-compose -o /etc/bash_completion.d/docker-compose
+            mkdir -p ~/.zsh/completion
+            curl -L https://raw.githubusercontent.com/docker/compose/1.27.4/contrib/completion/zsh/_docker-compose > ~/.zsh/completion/_docker-compose
+            fpath=(~/.zsh/completion $fpath)
+            autoload -Uz compinit && compinit -i
+            exec $SHELL -l
+
+    Étape 4 : Configuration supplémentaire
+        Nous allons faire une configuration supplémentaire, on va installer le shell zshell, un shell plus
+        fonctionnel que le bash.
+        Note : cette configuration supplémentaire est optionnelle.
+        a. Installer le shell zsh et vérifier son installation.
+            sudo apt install zsh -y
+            zsh --version
+        b. Changez votre shell par défaut pour zsh.
+            chsh -s $(which zsh)
+
+        Pour voir le changement, vous devez ouvrir une nouvelle 
+        fenêtre de commandes. À la fenêtre cidessous,
+        répondez 2 pour peupler le fichier ~/.zshrc.
+
+        c. Pour pouvoir personnaliser l’apparence vous devez installer oh-my-zsh.
+            sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-myzsh/master/tools/install.sh)"
+
+        La configuration de oh-my-zsh se fait par le fichier $HOME/.zshrc et les fichiers de configurations se
+        trouve sous $HOME/.oh-my-zsh/. Vous pouvez installer le thème que vous voulez, voir le lien de
+        référence.
+        
+        d. Un thème intéressant que je recommande est Powerlevel10k. Vous devez installer les polices du
+        thème avant d’installer le thème.
+            cd $HOME/Downloads
+            wget https://github.com/romkatv/powerlevel10kmedia/raw/master/MesloLGS%20NF%20Regular.ttf
+
+            wget https://github.com/romkatv/powerlevel10kmedia/
+            raw/master/MesloLGS%20NF%20Bold.ttf
+            wget https://github.com/romkatv/powerlevel10kmedia/
+            raw/master/MesloLGS%20NF%20Italic.ttf
+            wget https://github.com/romkatv/powerlevel10kmedia/
+            raw/master/MesloLGS%20NF%20Bold%20Italic.ttf
+        
+        Pour installer les polices, vous ouvrez le répertoire (dossier) Downloads et vous double-cliquez sur
+        chacune des polices.
+        
+        Voici les commandes pour installer le thème.
+        git clone --depth=1 https://github.com/romkatv/powerlevel10k.git
+        ~/powerlevel10k
+        echo 'source ~/powerlevel10k/powerlevel10k.zsh-theme' >>! ~/.zshrc
+
+Pour vérification
+
+    Remettre une capture d’écran de votre Linux avec un shell d’ouvert ayant les commandes suivantes
+    exécutées à l'intérieur :
+        git version
+        docker-compose version
+        docker-machine version
+
+Références
+https://kifarunix.com/install-and-setup-zsh-and-oh-my-zsh-on-ubuntu-20-04/
+
+cd Downloads
+p10k configure
+https://github.com/romkatv/powerlevel10k

@@ -1,0 +1,91 @@
+Se monter en DNS local qui est dynamique. (Grâce à cela, on peut faire un ping)
+
+static : /etc/hosts
+serveur DNS : /etc/systemd/resolved.conf 
+
+Mappage direct
+nom --> IP
+
+Mappage inverse
+Ip --> Nom
+
+On interroge notre serveur DNS qui va communiquer avec les autres serveurs de noms locaux
+
+Domaine (zone)
+--> domaine sans ses sous-arbres
+
+Modes: 
+Type de serveurs
+- Authoritaire: représente une zone
+- Master: les données viennent d'un disque
+- Primaire
+- Slave: Copie les données de Master
+- Secondaire: synonyme de Slave
+- Stub
+- Distribution
+- Non-Authoritaire
+	- Caching
+	- Forwarder
+- Recursive : DNS s'occupe de trouver la bonne adresse 
+- Non-recursive: il donne l'adresse de root 
+
+
+--------------------------
+docker run --name webhost -d nginx:alpine  -p 80:80 
+docker container inspect --format '{{ .NetworkSettings.IPAddress }}' webhost
+ip addr show dev ens160
+docker network ls
+docker network rm network_ID
+docker inspect network bridge
+docker container stop webhost
+
+// Ici on ne met pas de port, on ajoute le network host
+docker container run --name webhost2 --network host -d nginx:alpine
+
+// On devrait voir qu'il n'y a pas d'adresse car on s'est branché sur l'hôte
+docker container inspect --format '{{ .NetworkSettings.IPAddress }}' webhost2
+
+// On va voir que le port 80 s'exécuter sur la VM
+// On a donc parti un service sur le serveur de nginx (améliore les performance mais moins sécuritaire)
+sudo ss -tnap
+
+docker container rm -f webhost2
+docker container start webhost
+
+// on a 3 réseaux
+docker network ls
+
+//création d'un nouveau réseau 
+docker network create app_net2 webhost
+
+
+docker network connect app_net2 webhost
+
+docker container inspect
+
+Partie 2
+
+
+docker network inspect app_net2
+
+// On veut créer un alias à ce conteneur
+docker container run -d --name webhost2 --network app_net2 nginx:alpine
+
+// les webhost1 et 2 vont avoir une adresse différente
+docker network inspect app_net2
+
+docker container exec -it webhost2 ping webhost
+
+Étape 2
+docker round 
+
+1) Créer un nouveau réseau virtuel dns_rr
+		docker network create dns_rr
+		
+2) Créer 2 conteneurs (elasticsearch:2) avec le même alias DNS dns_rr
+	2.1) utiliser le paramètre       -network-alias search
+		docker container run -d --name webhost2 --network app_net2 nginx:alpine
+	
+3) Exécuter 
+	nslookup search --net
+4) centos curl -s search:9200 --net

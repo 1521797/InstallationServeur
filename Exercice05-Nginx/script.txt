@@ -1,0 +1,83 @@
+Exercice 5
+
+Partie 1 -- installation de nginx
+
+Structure de nginx.conf
+Nom du package				nginx
+Path du deamon				/usr/sbin/nginx
+Configuration root			/etc/nginx
+Fichier de configuration	nginx.conf
+Utilisateur par défaut		www-data
+
+Créer la structure
+Dev/
+	- SiteNginx/
+		nginx -c my_nginx
+		- html/
+			- index.html
+
+Démarrage/arrête et rechargement de la config
+nginx -s stop/quit/reload/reopen
+
+Vérification du fichier (t pour test)
+nginx -t
+
+******************
+nginx.conf
+******************
+events {}
+http{
+	server {
+		server_name www.monsite.com
+		root /var/www.admin.com
+	}
+}
+
+*****************
+SiteNginx
+*****************
+web:
+  image: nginx
+  volumes:
+   - ./templates:/etc/nginx/templates
+  ports:
+   - "8080:80"
+  environment:
+   - NGINX_HOST=foobar.com
+   - NGINX_PORT=80
+
+********************
+Dockerfile
+********************
+FROM nginx
+COPY static-html-directory /usr/share/nginx/html
+
+docker run --name some-nginx -v /home/user01/DevEx05/SiteNginx/html:/usr/share/nginx/html:rw -d nginx -p 8080:80
+
+docker run --name some-nginx -p 8080:80 -v "$PWD":/usr/share/nginx/html:rw -d nginx
+
+
+docker container ls
+ss -tnap | grep 8080
+
+
+connecter sur le serveur en ligne
+docker container exec -it some-nginx bash
+
+
+
+Étape 2
+Structure
+/SitesNginx/
+	-docker-compose.yml
+	-Dockerfile
+	-conf/	
+		-nginx.conf
+		-default.conf
+		-site02.com.conf
+	-site01/
+		-html/
+     		-index.html
+	-site02/
+		-html/
+			-index.html

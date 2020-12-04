@@ -1,0 +1,39 @@
+Apache 
+
+Transaction HTTP
+Transaction est une requête/réponse
+nc localhost 80
+GET /index.html HTTP/1.1
+
+La partie importante est l'état de la classe
+1: informatif
+2: accès
+3: redirection
+4: Erreur client
+5: erreur de serveur
+
+En-tête
+- Métadonnées d'une demande/réponse
+- Pour les requêtes:
+    - En-tête --> Host (ie Apache)
+    p 11 pour des exemples
+    Client --> Serveur
+Corp du message
+
+
+Logiciels serveurs HTTP
+Processus Démon (httpd) --> exécution en arrière-plan sur le serveur et attend les demandes des clients Web
+Pour améliorer l'efficacité --> il faut lancer plusieurs "fork" de apache
+
+Structure d'Apache
+Httpd est composé d'une interface qui permets de traiter des modules.
+    --> garder le contenu séparé de chaque serveur
+Les sites virtuels
+
+Hôte virtuel --> Host
+Un serveur Apache a plusieurs hôtes. 
+Le plus facile: se diriger vers des balises
+Le clien est dirigé vers un conteneur d'hôte virtuel (ServerName)
+
+Le conteneur virtuel:
+- Fournit l'emplacement du contenu et les journaux d'erreurs ou direcives de Directory à partir des paramètres globaux

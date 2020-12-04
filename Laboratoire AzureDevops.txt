@@ -1,0 +1,218 @@
+Laboratoire AzureDevops 1
+
+Exercice 1
+1) Configuration initiale:
+    -- Créer un projet avec le template : Parts Unlimited
+    -- Cloner le projet dans IDE Visual Studio
+    -- Dans Team Explorer, allez chercher notre projet.sln
+
+2) Configuration globale
+Dans un terminal
+git config --global credential.helper wincred
+git config --global user.name "Leakim Fiset"
+git config --global user.email lea.fiset@gmail.com
+
+Exercice 2
+1) Cloner un répertoire déjà existant
+    -- Copier l'adress https
+    -- Dans Visual Code, CTRL + SHIFT + P, 
+    -- Choisir : Git: Clone
+    -- Copier mon adresse
+
+2) Authentifier mon équipe tout seul
+    -- CTRL + SHIFT + P
+    -- Choisir: Team: Signin
+    -- Choisir: Authenticate and get an access token automatically
+    -- Copier le numéro de 9 caractères
+
+
+Exercice 3
+
+1) Commit
+    -- Prendre un fichier.cs (CartItems.cs) et le modifier 
+        --> Un M apparait sur le fichier
+    -- Sur le logo Branch, ajouter un commentaire et valider (CTRL + ENTER)
+    -- Dans la barre en bas, synchroniser les changements
+
+2) Valider le Commit
+    -- Dans Azure Devops, aller dans commits
+    -- Le commit devrait être sur le top
+
+3) Commit sur même fichier
+    -- Rechanger le même fichier et un autre fichier
+    -- Un commit stage, à le status "in progress" et n'affecte pas les autres fichiers
+    -- Il faut aujouter le stage avec 
+        -- .../Commit/Commit staged
+        -- Après que je le valide dans AzureDevops, le status devient "succeeded"
+
+Exercice 4
+1) Comparer des fichiers
+    -- Dans Branch, CTRL|SHIFT+P
+    -- Choisir: Team: View History
+    -- Le Browse files me permet de voir les anciens fichiers.
+
+Exercice 5
+1) Créer des branches dans mon local repository
+    -- Dans la barre en bas, cliquer sur master*
+    -- Choisir: Create new branch from ...
+    -- Écrire un nom (exemple : dev)
+    -- Sélectionner une brancher master
+
+2) BrancheSSSSS
+    -- Dans la barre en bas, cliquer sur le nuage pour actualiser
+    -- Dans AzureDevops, dans branches, je vais voir dev.
+    -- En supprimant dev de AzureDevops, on voit encore dev car ce n'est pas le même.
+        -- Dans AzureDevops c'est origin/dev 
+
+    Supprimer pour de vrai :
+    -- CTRL + SHIFT + P : Get: Delete Branch 
+    -- Choisir : dev
+    -- On voit que dev est supprimée, et que origin/dev est encore là
+
+    -- Git: Fetch (Prune) : MAJ de la branche origin en local dans le snapshot (efface les vieilles versions)
+
+
+Exercice 6
+1) Créer des nouvelles branches 
+    -- Dans AzureDevops: Donner un nom à un WorkItems
+    -- Dans VSC, Git Fetch
+
+2) Effacer une branche
+    -- Dans AzureDevops et effacer la branche
+    -- On peut la restorer avec Restore branch
+
+3) Protéger une branche
+    -- Dans AzureDevops, choisir les ... et choisir Lock
+
+4) Tagger une branche
+    -- Dans AzureDevops, Repos/Tags, on peut créer un tag
+
+
+Exercice 7
+Chaque repository a ses propres
+    - Permissions
+    - Branches
+
+1) Créer un nouveau repository dans AzureDevops
+    -- Dans AzureDevops, repository --> New Repo
+    -- Dans Project settings, on peut effacer le repository
+
+
+
+------------------------------------
+Laboratoire AzureDevops 2
+
+Faire un commentaire sur un fichier et le commiter
+MAJ des changements
+
+Exercice 1: Pull request
+    -- Pour Créer un nouveau request sur la branche courante:
+        CTRL + SHIFT + P, Team: Create Pull Request
+    -- On va voir que les informations devraient avoir la bonne branche et le bon tag
+
+Exercice 2: Manager les pull request
+    -- Dans la barre en bas, prendre le logo (Browse yout pull request)
+    -- Choisir le dernier pull request 
+        -- Dans l'onglet File: on voit les commit et on peut sélectionner un update spécifique
+        -- On peut ajouter un commentaire pour tous les programmeurs. 
+            -- Ce commentaire, on peut mettre sur le commentaire le status: Active, Pending, Resolved, Won't fix et closes
+        -- Updates
+        -- Commits: Faire Approve et complete merge
+            -- squash changes : merge option pour condenser l'historique des branches lorsque les pull request sont Completed
+    -- Regarder les pull request: 
+        -- Cherry-pick: processus de sélection de commit spécifiques d'une branche et l'appliquer à une autre. (semblable à Copy/paste)
+        -- Revert
+        -- Work Items: 
+            -- status : Done/
+        -- Development 
+
+
+Exercice 3: Managing Git branch et pull request politiques
+    -- Dans les Project settings, Repos/Repositories/monProjet
+    -- Options
+
+
+Laboratoire 3: Configuration CI (intégration continue) et CD (déployement continu)
+-- On va contruire dans Azure Pipelines
+    - Branche Build
+    - Branche Release
+
+Exercice 1: Créer un pipe Build
+    -- Aller sur le projet dans AzureDevops/Pipelines/New Pipeline
+    -- Les fichiers sont en YAML --> utiliser l'éditeur classique
+    -- Ce build utilise 
+        - la branche Master
+        - ASP.NET template
+        - En sachant la source, AzureDevops va restorer les packages 
+    -- Sélectionner les Variables
+        -- Configuration de la plateforme
+    -- Triggers
+        -- Cocher Enable continuous integration
+    -- Options  
+        -- Pour gérer le flow du build (souvent pour des tâches spécifiques de la configuration de la vue )
+    -- Retention:
+        -- Clic droit sur "go to the project settings to configure"
+            -- Sélectionner "Open in  new tab"
+            -- Choisir quelle pipeline runs, pour combien de temps... 
+    -- History  
+        -- Historique des changements dans la définition du build
+    -- Save & queue --> queue un nouveau build
+    -- Save and run --> accepter les options par défaut
+
+Exercice 2: Retracer et regarder un ancien build
+-- Dans Pipeline, faire ... et RUN
+-- Lorsque le build commence, on va traquer la console. Cliquer sur Agent job 1
+    -- À droite, on voit le paneau des logs
+    -- Le message final devrait être réussi 
+-- Summary : informations sur les builds, les commits, tests artifacts
+-- Test: voir les performances
+
+Exercice 3: Invoquer CI build
+-- Aller dans Repos/Files
+-- Ouvrir le ficher PartsUnlimited-aspnet45/src/PartsUnlimitedWebsite/Views/Home/Index.cshtml
+-- Cliquer sur Editer
+    -- Tester en changeant le nom du titre et cliquer sur commit
+
+-- Dans Pipelines, on va voir dateAujourdHUI.2
+-- Le .2 devrait runner et fonctionner aussi
+
+
+Laboratoire 4: Configuration des Pipelines CI/CD en code YAML
+Exercice 1: Créer des ressources Azure
+-- Aller sur https://portal.azure.com.
+-- Create a ressource
+    - "Web App + SQL"
+    - Clic sur Create
+
+-- Donner un nom pour le fichier service.yaml
+    -- Dans Ressource group, Create new
+
+-- Database --> Create a new Database   
+    --> Lui donner un nom
+-- Target server --> Create a new server
+    --> Lui donner un nom
+    --> Clic sur Select
+-- Clic sur Create 
+
+* Ça peut planter... Créer un app service avant sinon
+
+
+Exercice 2: Configurer le projet
+-- Il faut disable le build pipeline qui existe déjà
+-- Dans Pipelines, sélectionner la Pipeline PartsUnlimitedE2E (...)
+-- Choisir Pause
+
+
+Exercice 3: Ajouter un fichier yaml de configuration
+-- Aller dans Pipelines/New pipeline
+-- Choisir Azure Repos Git YAML comme source hosting platform
+-- Choisir PartsUnlimited comme repository
+-- Choisir ASP.NET comme template du pipeline
+    -- Ce fichier va s'appeler azure-pipelines.yml dans root
+-- Save and run
+-- Tracker la job (lab 3 exercice 2)
+
+
+Exercice 4: Ajouter CD un fichier yaml de configuration
+
+Exercice 5: Regarder le deployement

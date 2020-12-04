@@ -1,0 +1,211 @@
+Exercice 4
+
+Étape 1
+
+Structure
+
+Sites/
+	docker-compose.yml
+	monsite/
+		Dockerfile
+		conf/
+			httpd.conf
+		html/
+			index.html
+			info.php
+	php/
+		Dockerfile
+-----------------------------------
+-----------------------------------
+info.php
+-----------------------------------
+<h1>Je le test!</h1>
+<h4>Tentative de connexion MySQL depuis PHP</h4>
+<?php
+$host = 'mysql';
+$user = 'root';
+$pass = 'rootpassword';
+$conn = new mysqli($host, $user, $pass);
+
+
+if ($conn->connect_error){
+	die("La connexion a échoué: " . $conn->connect_error);
+}
+echo "Connexion réussi à MySQL";
+?>
+-----------------------------------
+-----------------------------------
+docker-compose.yml dans Sites
+-----------------------------------
+version: "3.2"
+
+services:
+	php:
+		build: './php/'
+		networks:
+			- backend
+		volumes:
+			- ./monsite/html:/srv/htdocs
+	apache:
+		build: './monsite/'
+		depends_on:
+			- php
+			- mysql
+		networks:
+			- frontend
+			- backend
+		ports:
+			- "8080:80"
+		volumes:
+			- ./monsite/html:/srv/htdocs
+		mysql:
+			image: mysql:5.6.40
+			networks:
+				- backend
+			environment:
+				- MYSQL_ROOT_PASSWORD=rootpassword
+networks:
+	- frontend:
+	- backend:
+
+-----------------------------------
+-----------------------------------
+Dockerfile de php
+-----------------------------------
+FROM php:7.2.7-fpm-alpine3.7
+
+RUN apk update; \
+	apk upgrade;
+
+RUN docker-php-ext-install mysqli
+
+-----------------------------------
+-----------------------------------
+-----------------------------------
+-----------------------------------
+-----------------------------------
+
+Partie 2
+
+Structure
+DEV/
+	vSites/
+		Dockerfile
+		docker-compose.yml
+		conf/
+			httpd.conf
+			httpd-vhosts.conf
+		site01/
+			html/
+				index.html
+		site02/
+			html/
+				index.html
+
+
+-----------------------------------
+-----------------------------------
+Dockerfile de vSites
+
+Créer un Dockerfile dans vSites pour créer une image httpd:latest. 
+Dans l’image, mettre à jour le serveur, et exposer les port 80 et 443.
+-----------------------------------
+FROM httpd:latest
+
+RUN apk update; \
+	apk upgrade;
+
+EXPOSE 80 443
+
+RUN docker-php-ext-install mysqli
+-----------------------------------
+-----------------------------------
+docker-compose.yml dans vSites
+Créer un fichier docker-compose.yml pour construire et lancer le conteneur httpd:latest 
+que vous allez appeler apache, exposer le port 80 au port 80 du conteneur et 
+créer un point de montage du répertoire site01/html 
+vers le répertoire /usr/local/apache2/htdocs du conteneur.
+-----------------------------------
+version: "3.2"
+
+services:
+	apache:
+		build: './vSites/' # P-t à modifier 
+		depends_on:
+			- php
+			- mysql
+		networks:
+			- frontend
+			- backend
+		ports:
+			- "8080:80"
+			- "80:80"
+		volumes:
+			- ./site01/html:/usr/local/apache2/htdocs
+networks:
+	- frontend:
+	- backend:
+-----------------------------------
+-----------------------------------
+httpd-vhosts de conf de la VM
+-----------------------------------
+Modifier les lignes pour ajouter www.site01.com à localhost
+
+<VirtualHost *:80>
+	ServerAdmin 1521797@csfoy.ca
+	DocumentRoot "/usr/local/apache2/htdocs/site01.com"
+	ServerName site01.com
+	ServerAlias www.site01.com
+	ErrorLog "logs/site01.com-error_log"
+	CustomLog "logs/site01.com-access_log" common
+</VirtualHost>
+-----------------------------------
+-----------------------------------
+Dockerfile de vSites ligne 108
+
+Attention : vous devez utiliser le paramètre -p avec mkdir pour créer un répertoire ayant un sous-répertoire. 
+-----------------------------------
+FROM httpd:latest
+
+RUN apk update; \
+	apk upgrade;
+
+EXPOSE 80 443
+
+WORKDIR ./usr/local/apache2/htdocs/
+RUN COPY ./conf/httpd.conf ./site01.com/conf/
+RUN COPY ./conf/httpd.conf ./site02.com/conf/
+
+RUN COPY ./conf/httpd-vhosts.conf ./site01.com/conf/extra/
+RUN COPY ./conf/httpd-vhosts.conf ./site02.com/conf/extra/
+
+RUN docker-php-ext-install mysqli
+
+-----------------------------------
+docker-compose.yml dans vSites
+Créer un fichier docker-compose.yml pour construire et lancer le conteneur httpd:latest 
+que vous allez appeler apache, exposer le port 80 au port 80 du conteneur et 
+créer un point de montage du répertoire site01/html 
+vers le répertoire /usr/local/apache2/htdocs du conteneur.
+-----------------------------------
+version: "3.2"
+
+services:
+	apache:
+		build: './vSites/' # P-t à modifier 
+		depends_on:
+			- php
+			- mysql
+		networks:
+			- frontend
+			- backend
+		ports:
+			- "8080:80"
+			- "80:80"
+		volumes:
+			- ./site01/html:/usr/local/apache2/htdocs
+networks:
+	- frontend:
+	- backend:
+
+
