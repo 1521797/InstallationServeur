@@ -1,0 +1,9 @@
+# apt_update.yml
+---
+  - hosts: webservers:loadblancers
+    become: true
+    tasks:
+      - name: UPDATE PACKAGES
+        apt:
+          name: '*'
+          state: latest

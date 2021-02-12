@@ -1,0 +1,5 @@
+# all_playbooks.yml
+
+---
+  - import_playbook: apt_update.yml
+  - import_playbook: install_services.yml

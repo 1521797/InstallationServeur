@@ -1,0 +1,7 @@
+Changer la ligne du dossier /etc/apache2/mods-available/dir.conf 
+DirectoryIndex index.html index.cgi index.pl index.php index.xhtml index.htm
+
+Pour 
+DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
+
+//Creer un playbook --> include /etc/nginx/sites-enabled/*; dans le fichier /etc/nginx/nginx.conf
